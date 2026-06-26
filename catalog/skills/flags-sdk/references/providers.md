@@ -20,16 +20,20 @@
 
 ## Vercel
 
-Package: `@flags-sdk/vercel` (also requires `@vercel/flags-core`)
+Package: `@flags-sdk/vercel`
 
 ```bash
-pnpm i flags @flags-sdk/vercel @vercel/flags-core
+pnpm i flags @flags-sdk/vercel
 ```
 
 ### Setup
 
-1. Create a flag in the Vercel dashboard
-2. Pull env vars: `vercel env pull` (sets `FLAGS` and `FLAGS_SECRET`)
+> **Prerequisite**: The `vercel flags` commands require the Vercel CLI to be installed and authenticated. If the Vercel CLI is not installed, run `pnpm i -g vercel`. For authentication or linking issues, read and follow the `vercel-cli` skill. If it's not installed, run `npx skills add https://github.com/vercel/vercel --skill vercel-cli`.
+
+Before running any `vercel flags` command, verify the project is linked to Vercel. Check for a `.vercel` directory in the project root. If it doesn't exist, run `vercel link` first.
+
+1. Create a flag in the Vercel dashboard or via CLI: `vercel flags add <flag-key> --kind boolean --description "<description>"`
+2. Pull env vars: you **must** run `vercel env pull` to write `FLAGS` and `FLAGS_SECRET` to `.env.local`. Without these environment variables, `vercelAdapter` will not be able to evaluate flags.
 3. Declare the flag:
 
 ```ts
@@ -38,7 +42,7 @@ import { vercelAdapter } from '@flags-sdk/vercel';
 
 export const exampleFlag = flag({
   key: 'example-flag',
-  adapter: vercelAdapter(),
+  adapter: vercelAdapter,
 });
 ```
 
@@ -61,7 +65,7 @@ const identify = dedupe(async (): Promise<Entities> => ({
 export const exampleFlag = flag<boolean, Entities>({
   key: 'example-flag',
   identify,
-  adapter: vercelAdapter(),
+  adapter: vercelAdapter,
 });
 ```
 
@@ -86,9 +90,105 @@ const customAdapter = createVercelAdapter(process.env.CUSTOM_FLAGS_KEY!);
 
 export const exampleFlag = flag({
   key: 'example-flag',
-  adapter: customAdapter(),
+  adapter: customAdapter,
 });
 ```
+
+### Using your own client (e.g. for singleton)
+
+If the app also uses `@vercel/flags-core` directly, create the client once and pass it to the adapter so both share the same instance:
+
+```ts
+import { createClient } from '@vercel/flags-core';
+import { createVercelAdapter } from '@flags-sdk/vercel';
+
+const vercelFlagsClient = createClient(process.env.FLAGS);
+const vercelAdapter = createVercelAdapter(vercelFlagsClient);
+
+export const exampleFlag = flag({
+  key: 'example-flag',
+  adapter: vercelAdapter,
+});
+```
+
+### `vercel flags` CLI
+
+Manage Vercel Flags from the terminal. Requires the [Vercel CLI](https://vercel.com/docs/cli) and a linked project.
+
+> **Prerequisite**: The Vercel CLI must be installed (`pnpm i -g vercel`) and the project must be linked (`vercel link` — check for a `.vercel` directory). For authentication issues, read and follow the `vercel-cli` skill.
+
+#### Subcommands
+
+| Subcommand   | Description                                           |
+| ------------ | ----------------------------------------------------- |
+| `list`       | List all flags in the project                         |
+| `add`        | Create a new flag                                     |
+| `inspect`    | Show details, status, and targeting rules of a flag   |
+| `enable`     | Enable a boolean flag for a specific environment      |
+| `disable`    | Disable a boolean flag for a specific environment     |
+| `archive`    | Archive a flag (required before deleting)              |
+| `rm`         | Delete an archived flag                               |
+| `sdk-keys`   | Manage SDK keys (subcommands: `ls`, `add`, `rm`)      |
+
+#### Create and toggle a flag
+
+```bash
+# Create a boolean flag with a description
+vercel flags add my-feature --kind boolean --description "New onboarding flow"
+
+# Enable in development first
+vercel flags enable my-feature --environment development
+
+# Promote to production
+vercel flags enable my-feature --environment production
+
+# Disable in production
+vercel flags disable my-feature --environment production
+
+# Change string variant in production
+vercel flags set my-feature -e production --variant my-variant
+```
+
+`enable` and `disable` only work with boolean flags. For changing the state of other flag types, use the `set` command. Use the vercel-cli skill for full reference.
+
+
+#### Inspect and list flags
+
+```bash
+# Show details of a specific flag (status, environments, targeting rules)
+vercel flags inspect my-feature
+
+# List all flags in the project
+vercel flags list
+```
+
+#### Archive and delete a flag
+
+A flag must be archived before it can be deleted:
+
+```bash
+vercel flags archive my-feature
+vercel flags rm my-feature
+```
+
+#### Manage SDK keys
+
+SDK keys connect your application to Vercel Flags. The `FLAGS` environment variable contains an SDK key.
+
+```bash
+# List SDK keys for the project
+vercel flags sdk-keys ls
+
+# Create a new SDK key
+vercel flags sdk-keys add
+
+# Remove an SDK key
+vercel flags sdk-keys rm <sdk-key-id>
+```
+
+These examples cover common flag operations. For the full `vercel flags` reference and other Vercel CLI commands, see the `vercel-cli` skill. If it's not installed: `npx skills add https://github.com/vercel/vercel --skill vercel-cli`
+
+Full CLI reference: https://vercel.com/docs/cli/flags
 
 ---
 
@@ -109,7 +209,7 @@ import { flag } from 'flags/next';
 import { edgeConfigAdapter } from '@flags-sdk/edge-config';
 
 export const exampleFlag = flag({
-  adapter: edgeConfigAdapter(),
+  adapter: edgeConfigAdapter,
   key: 'example-flag',
 });
 ```
@@ -566,6 +666,36 @@ export function createMyAdapter(/* options */) {
 }
 ```
 
+### Bulk evaluation (`bulkDecide`)
+
+Adapters can implement an optional `bulkDecide` hook. When set (and the adapter has an `adapterId`), `evaluate()` calls it once for every group of flags that share this adapter and the same `identify` source — instead of calling `decide` per flag. This lets the provider share work across evaluations (e.g. a single network request for many flags).
+
+```ts
+return {
+  adapterId: 'my-provider', // required for bulkDecide to be used
+  origin(key) {
+    return `https://my-provider.com/flags/${key}`;
+  },
+  async decide({ key }): Promise<ValueType> {
+    return false as ValueType;
+  },
+  // Called by evaluate() for a batch of flags sharing this adapter + identify
+  async bulkDecide({ flags, entities, headers, cookies }) {
+    // flags: { key: string; defaultValue?: unknown }[]
+    // Return a record keyed by flag key.
+    return Object.fromEntries(
+      flags.map(({ key }) => [key, false as ValueType]),
+    );
+  },
+};
+```
+
+Contract:
+
+- Return `Record<flagKey, value>`. Missing keys or `value: undefined` fall back to each flag's `defaultValue`.
+- Throwing falls back to `defaultValue` per flag (and rejects for flags without a `defaultValue`).
+- A flag with an inline `decide` takes precedence and is excluded from bulk evaluation.
+
 ### Default adapter pattern
 
 Expose a lazily-initialized default for simpler usage:
@@ -589,6 +719,6 @@ import { myAdapter } from './my-adapter';
 
 export const exampleFlag = flag({
   key: 'example',
-  adapter: myAdapter(),
+  adapter: myAdapter,
 });
 ```
