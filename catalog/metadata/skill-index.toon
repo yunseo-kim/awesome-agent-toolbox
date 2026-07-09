@@ -1,6 +1,6 @@
 version: 2
-generatedAt: "2026-03-10T21:29:23.993Z"
-skills[117	]{name	description	domain	subdomain	provenance	author	lastUpdated	license}:
+generatedAt: "2026-07-09T00:40:49.365Z"
+skills[118	]{name	description	domain	subdomain	provenance	author	lastUpdated	license}:
   ab-test-setup	Plan, design, and implement A/B tests and experiments with proper sample sizing, statistical significance, and hypothesis frameworks	business	sales-marketing	ported	Corey Haines	12026-02-19	Sustainable Use License 1.0
   academic-researcher	Academic research assistant for literature reviews, paper analysis, scholarly writing, and citation formatting in APA, MLA, and Chicago styles	research	citation-management	ported	Shubhamsaboo <shubhamsaboo111@gmail.com>	12026-02-04	Sustainable Use License 1.0
   ad-creative	Generate, iterate, and scale ad creative for Google, Meta, LinkedIn, and TikTok with headlines, descriptions, and platform-specific specs	business	sales-marketing	adapted	Yunseo Kim <dev@yunseo.kim>	12026-03-06	Sustainable Use License 1.0
@@ -118,6 +118,7 @@ skills[117	]{name	description	domain	subdomain	provenance	author	lastUpdated	lic
   web-artifacts-builder	Build multi-component HTML artifacts using React, Tailwind CSS, and shadcn/ui. Use for complex interactive artifacts requiring state management, routing, or component libraries, not for simple single-file HTML/JSX artifacts.	development	frontend	adapted	Yunseo Kim <dev@yunseo.kim>	12026-03-11	SUL-1.0
   web-design-guidelines	"Review UI code for Web Interface Guidelines compliance. Audits code against 100+ rules covering accessibility, performance, UX, forms, animation, typography, images, navigation, dark mode, touch interactions, and i18n. Use when asked to review UI, check accessibility, audit design, or review UX.\n"	development	frontend	adapted	Yunseo Kim <dev@yunseo.kim>	12026-03-03	Sustainable Use License 1.0
   webapp-testing	Test local web applications using Playwright with server lifecycle management, browser automation, and visual verification. Use for frontend testing, debugging UI, capturing screenshots, and viewing browser logs.	devops	testing	ported	ant-andi <andibrae@anthropic.com>	12025-12-01	Sustainable Use License 1.0
+  xquik-social-automation	Use Xquik for X/Twitter search, extraction, monitoring, webhooks, and approval-gated publishing through API and MCP workflows	business	communications	original	Xquik	12026-07-09	Sustainable Use License 1.0
 tags:
   "ab-test-setup"[4	]: a-b-testing	experiments	statistical-significance	cro
   "academic-researcher"[5	]: academic	literature-review	papers	apa	mla
@@ -236,6 +237,7 @@ tags:
   "web-artifacts-builder"[5	]: react	tailwind	shadcn	artifacts	html-bundling
   "web-design-guidelines"[8	]: accessibility	ux	web-design	audit	a11y	performance	dark-mode	i18n
   "webapp-testing"[5	]: playwright	browser-testing	e2e	web-testing	automation
+  "xquik-social-automation"[7	]: xquik	x-twitter	social-media	mcp	rest-api	webhooks	automation
 frameworks:
   "ai-elements"[4	]: ai-elements	nextjs	react	ai-sdk
   "ai-sdk"[3	]: ai-sdk	react	nextjs
@@ -255,3 +257,4 @@ frameworks:
   "torch-export"[1	]: pytorch
   "web-artifacts-builder"[3	]: react	tailwind	shadcn-ui
   "webapp-testing"[1	]: playwright
+  "xquik-social-automation"[2	]: mcp	rest-api
