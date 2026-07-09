@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-03-10T21:29:23.993Z",
+  "generatedAt": "2026-07-09T00:40:49.365Z",
   "skills": [
     {
       "name": "ab-test-setup",
@@ -1140,6 +1140,16 @@
       "author": "ant-andi <andibrae@anthropic.com>",
       "lastUpdated": "12025-12-01",
       "license": "Sustainable Use License 1.0"
+    },
+    {
+      "name": "xquik-social-automation",
+      "description": "Use Xquik for X/Twitter search, extraction, monitoring, webhooks, and approval-gated publishing through API and MCP workflows",
+      "domain": "business",
+      "subdomain": "communications",
+      "provenance": "original",
+      "author": "Xquik",
+      "lastUpdated": "12026-07-09",
+      "license": "Sustainable Use License 1.0"
     }
   ],
   "tags": {
@@ -1980,6 +1990,15 @@
       "e2e",
       "web-testing",
       "automation"
+    ],
+    "xquik-social-automation": [
+      "xquik",
+      "x-twitter",
+      "social-media",
+      "mcp",
+      "rest-api",
+      "webhooks",
+      "automation"
     ]
   },
   "frameworks": {
@@ -2056,6 +2075,10 @@
     ],
     "webapp-testing": [
       "playwright"
+    ],
+    "xquik-social-automation": [
+      "mcp",
+      "rest-api"
     ]
   }
 }
